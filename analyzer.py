@@ -136,22 +136,23 @@ class TechnicalAnalyzer:
     
     def _calculate_optimal_leverage(self, volatility: float, confidence: float) -> int:
         """Расчет оптимального плеча"""
-        # Базовое плечо на основе уверенности
+        # Новая логика: диапазоны плеча по уверенности
         if confidence > 80:
-            base_leverage = 20
+            # x35-x100, линейно по уверенности
+            base_leverage = 35 + int((confidence - 80) / 20 * (100 - 35))
         elif confidence > 60:
-            base_leverage = 10
-        elif confidence > 40:
-            base_leverage = 5
+            # x10-x25, линейно по уверенности
+            base_leverage = 10 + int((confidence - 60) / 20 * (25 - 10))
         else:
-            base_leverage = 3
-        
+            # x2-x10, линейно по уверенности
+            base_leverage = 2 + int(confidence / 60 * (10 - 2))
+
         # Корректировка на волатильность
         if volatility > 8:  # Высокая волатильность - меньше плечо
-            base_leverage = max(base_leverage // 2, 2)
+            base_leverage = max(int(base_leverage // 2), 2)
         elif volatility < 3:  # Низкая волатильность - можно больше
-            base_leverage = min(base_leverage * 1.5, 50)
-        
+            base_leverage = min(int(base_leverage * 1.5), 100)
+
         # Находим ближайшее доступное плечо
         return min(LEVERAGES, key=lambda x: abs(x - base_leverage))
     
