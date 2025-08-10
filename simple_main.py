@@ -112,19 +112,18 @@ class SimpleTradingRecommendationSystem:
             direction = random.choice(['LONG', 'SHORT'])
             reasoning = f"стабильные изменения ({price_change_24h:+.1f}%), технический анализ"
         
-        # Подбираем плечо на основе волатильности
-        abs_change = abs(price_change_24h)
-        if abs_change > 15:
-            leverage = random.choice([2, 3, 5])  # Низкое плечо для высокой волатильности
-        elif abs_change > 8:
-            leverage = random.choice([5, 10])    # Среднее плечо
-        elif abs_change > 3:
-            leverage = random.choice([10, 20])   # Высокое плечо для низкой волатильности
-        else:
-            leverage = random.choice([3, 5, 10]) # Умеренное плечо
-        
+        # Новая логика подбора плеча по уверенности
         confidence = min(opportunity['score'], 85)  # Максимум 85% уверенности
-        
+        if confidence > 80:
+            leverage = 35 + int((confidence - 80) / 20 * (100 - 35))
+        elif confidence > 60:
+            leverage = 10 + int((confidence - 60) / 20 * (25 - 10))
+        else:
+            leverage = 2 + int(confidence / 60 * (10 - 2))
+
+        # Находим ближайшее доступное плечо
+        leverage = min(LEVERAGES, key=lambda x: abs(x - leverage))
+
         return {
             'ticker': ticker,
             'direction': direction,
