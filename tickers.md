@@ -1,0 +1,13 @@
+BTC  
+ETH  
+XRP
+BNB  
+SOL  
+USDC  
+stETH  
+TRX  
+DOGE  
+ADA  
+HYPE  
+SUI  
+XLM
