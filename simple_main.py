@@ -113,16 +113,20 @@ class SimpleTradingRecommendationSystem:
             reasoning = f"стабильные изменения ({price_change_24h:+.1f}%), технический анализ"
         
         # Новая логика подбора плеча по уверенности
-        confidence = min(opportunity['score'], 85)  # Максимум 85% уверенности
-        if confidence > 80:
-            leverage = 35 + int((confidence - 80) / 20 * (100 - 35))
-        elif confidence > 60:
-            leverage = 10 + int((confidence - 60) / 20 * (25 - 10))
+        confidence = min(opportunity['score'], 100)  # Максимум 100% уверенности
+        
+        if confidence >= 100:
+            target_leverage = random.randint(75, 100)
+        elif confidence >= 90:
+            target_leverage = 50
+        elif confidence >= 80:
+            target_leverage = 25
         else:
-            leverage = 2 + int(confidence / 60 * (10 - 2))
+            # Линейная интерполяция от x2 до x25 для уверенности < 80%
+            target_leverage = 2 + (confidence / 80) * (25 - 2)
 
         # Находим ближайшее доступное плечо
-        leverage = min(LEVERAGES, key=lambda x: abs(x - leverage))
+        leverage = min(LEVERAGES, key=lambda x: abs(x - target_leverage))
 
         return {
             'ticker': ticker,
